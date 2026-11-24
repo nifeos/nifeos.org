@@ -3,7 +3,7 @@
 # Build partsfoundry.org: fetch the design record at the commit basalt pins, render it with
 # Eleventy, index it with Pagefind, check every internal link, and report.
 #
-# The record lives in nifeos/record and is never copied into this repository. basalt's pins.toml,
+# The record lives in partsfoundry/record and is never copied into this repository. basalt's pins.toml,
 # on basalt's main, names the record commit that goes with the current distribution in its
 # `[record]` table, and this script builds that commit. `--record-commit` builds another commit
 # (the record's main, say, to preview a change before basalt's pin follows it), and `--record`
@@ -43,7 +43,7 @@
 set -eu
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-organization="https://github.com/nifeos"
+organization="https://github.com/partsfoundry"
 cache="$root/target/sources"
 
 usage() {
@@ -85,7 +85,7 @@ fetch_commit() {
 }
 
 # basalt's main, read once: it pins the record commit this site builds by default, and the nife
-# commit a `nifeos/nife:<path>` reference in the record means. Only pins.toml is fetched.
+# commit a `partsfoundry/nife:<path>` reference in the record means. Only pins.toml is fetched.
 basalt_commit="$(git ls-remote "$organization/basalt" refs/heads/main | cut -f1)"
 [ -n "$basalt_commit" ] || { echo "script/site: cannot read basalt's main" >&2; exit 1; }
 pins="$cache/basalt-pins-$basalt_commit.toml"
@@ -126,7 +126,7 @@ else
             named="$record_commit"
             record_commit="$(git ls-remote "$organization/record" "refs/heads/$named" | cut -f1)"
             [ -n "$record_commit" ] ||
-                { echo "script/site: nifeos/record has no branch $named; pass a full commit or a branch" >&2; exit 1; }
+                { echo "script/site: partsfoundry/record has no branch $named; pass a full commit or a branch" >&2; exit 1; }
         fi
     fi
     record="$(fetch_commit record "$record_commit")"

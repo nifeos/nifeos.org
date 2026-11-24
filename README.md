@@ -2,7 +2,7 @@
 
 This repository builds the website at partsfoundry.org. Today the site is the design record of the
 nifeos projects: every roadmap milestone, decision, journey, fatal risk, tenet and note in
-[nifeos/record](https://github.com/nifeos/record), with search. A page for each crate and the
+[partsfoundry/record](https://github.com/partsfoundry/record), with search. A page for each crate and the
 tutorial join it later.
 
 None of what the site shows lives here. At build time the builder fetches the record from its own
@@ -26,8 +26,8 @@ are drafts:
 
 There is no hand-written index. The front page lists the records by kind, read from each file's H1
 and frontmatter. In prose, `milestone N` and `§N` link to those addresses, a bare `#N` links to that
-pull request in nifeos/nife, and `nifeos/<repo>#N`, `nifeos/<repo>@<commit>` and
-`nifeos/<repo>:<path>` link to GitHub, except that a `nifeos/record:<path>` naming a page this site
+pull request in partsfoundry/nife, and `partsfoundry/<repo>#N`, `partsfoundry/<repo>@<commit>` and
+`partsfoundry/<repo>:<path>` link to GitHub, except that a `partsfoundry/record:<path>` naming a page this site
 renders links to that page.
 
 ## Which record it builds
@@ -35,7 +35,7 @@ renders links to that page.
 The builder reads `pins.toml` on basalt's main and builds the record commit in its `[record]`
 table. basalt is the distribution, and that table says which commit of the record goes with what
 it ships, so the site shows the record at the commit every other reader of the record (nife's
-tooling, the record's own lint) uses, and a `nifeos/nife:<path>` link lands on the nife commit
+tooling, the record's own lint) uses, and a `partsfoundry/nife:<path>` link lands on the nife commit
 pinned in the same file. basalt's record-pin-bump workflow proposes the record's newest main after
 each merge there, so the site trails the record's main by one pull request in basalt. A build of the
 record's main directly is a run away: `script/site --record-commit main`, or the workflow's

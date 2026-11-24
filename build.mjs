@@ -27,7 +27,7 @@ const work = path.resolve(process.env.SITE_WORK || path.join(here, "target", "bu
 const input = path.join(work, "input");
 const output = path.join(work, "site");
 // The record's directories and root documents the site renders. The record's script/ and helpers/
-// are code; a link to them goes to the file in nifeos/record at the built commit.
+// are code; a link to them goes to the file in partsfoundry/record at the built commit.
 const ROOTS = ["design", "notes", "AGENTS.md"];
 
 function seconds(start) {
@@ -149,7 +149,7 @@ function summary(report) {
   const lines = [
     "## partsfoundry.org build",
     "",
-    `Built from nifeos/record at \`${report.recordCommit.slice(0, 12)}\`${pin}. Nothing is deployed; the site is this run's artifact.`,
+    `Built from partsfoundry/record at \`${report.recordCommit.slice(0, 12)}\`${pin}. Nothing is deployed; the site is this run's artifact.`,
     "",
     total ? `**${total} check failures.** The build fails.` : "Every check passes.",
     "",
@@ -162,7 +162,7 @@ function summary(report) {
     `| search index | ${megabytes(report.index.bytes)} in ${report.index.files} files; a first search fetches ${(search.firstSearchBytes / 1024).toFixed(0)} KB |`,
     `| whole site | ${megabytes(report.site.bytes)} in ${report.site.files} files |`,
     `| citations (\`milestone N\`, \`§N\`) | ${markdown.citations}, of which ${markdown.unresolvedCitations} name no record |`,
-    `| repository references (\`#N\`, \`nifeos/<repo>#N\`, \`@<commit>\`, \`:<path>\`) | ${markdown.pullRequestReferences + markdown.qualifiedReferences} |`,
+    `| repository references (\`#N\`, \`partsfoundry/<repo>#N\`, \`@<commit>\`, \`:<path>\`) | ${markdown.pullRequestReferences + markdown.qualifiedReferences} |`,
     `| internal links checked | ${links.internalLinks}: ${links.missingPages} to no page, ${links.missingFragments} to no heading |`,
     `| relative links in the record | ${markdown.relativeLinks}: ${markdown.inRecordBreaks} to no file, ${markdown.repositoryLinks} to record files the site does not render (linked on GitHub) |`,
     `| lockfile | ${report.packages.locked} packages locked${report.packages.installed === null ? "" : `, ${report.packages.installed} installed on this platform`} |`,

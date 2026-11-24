@@ -41,7 +41,7 @@ module.exports = function configure(config) {
   config.addGlobalData("eleventyComputed", {
     permalink: (data) => (isIndex(data) ? "/index.html" : addressFor(repositoryPath(data)) + "index.html"),
     sourcePath: (data) => repositoryPath(data),
-    sourceUrl: (data) => `https://github.com/nifeos/record/blob/${commit}/${repositoryPath(data)}`,
+    sourceUrl: (data) => `https://github.com/partsfoundry/record/blob/${commit}/${repositoryPath(data)}`,
     kind: (data) => (isIndex(data) ? "" : addressFor(repositoryPath(data)).split("/")[1]),
     title: (data) => {
       const heading = /^#\s+(.+)$/m.exec(data.page.rawInput || "");
