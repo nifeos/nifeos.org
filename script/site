@@ -45,7 +45,8 @@
 # - Heading identifiers follow GitHub's rule for ASCII headings. A heading with other punctuation
 #   may get a different identifier here than on GitHub, and the fragment check fails the build on
 #   a link written against GitHub's.
-# - Links to sites outside this one are not checked. A remote outage must not fail a build.
+# - Links to sites outside this one are not checked here, since a remote outage must not fail a
+#   build. script/external-links.mjs checks them, weekly, outside the merge gate.
 
 set -eu
 

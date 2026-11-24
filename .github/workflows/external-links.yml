@@ -1,0 +1,110 @@
+# Checks the site's links to other sites once a week, and reports through one labelled issue.
+#
+# The build on each pull request (site.yml) checks every link inside the site and fetches nothing
+# remote, because a remote outage must not fail a merge. This workflow is the other half, and it is
+# never a required check: it runs on a schedule and by hand only, never on a pull request or in the
+# merge queue. It builds the site at basalt's pin, as site.yml does, and runs
+# script/external-links.mjs, which requests each distinct external address once, with a timeout and
+# retries.
+#
+# The report is one open issue labelled `external-links`. When addresses fail, the workflow
+# replaces that issue's body with the newest report, or opens the issue when none is open. When
+# every address answers, it comments on the open issue and closes it. The label is created on the
+# first run that needs it.
+
+name: external links
+
+on:
+  schedule:
+    - cron: "23 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: external-links
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: external links
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # The same pinned Node as site.yml, checked against the digest in .node-sha256.
+      - name: Install the pinned Node
+        run: |
+          set -eu
+          version="$(cat .node-version)"
+          sum="$(sed -n '/^[0-9a-f]\{64\}$/p' .node-sha256)"
+          if [ "${#sum}" -ne 64 ]; then
+            echo "==> .node-sha256 must hold exactly one 64-hex digest line" >&2
+            exit 2
+          fi
+          curl --fail --silent --show-error --location --retry 3 \
+            --output "$RUNNER_TEMP/node.tar.xz" \
+            "https://nodejs.org/dist/v${version}/node-v${version}-linux-x64.tar.xz"
+          echo "${sum}  $RUNNER_TEMP/node.tar.xz" | sha256sum --check --strict -
+          mkdir -p "$RUNNER_TEMP/node"
+          tar -xJf "$RUNNER_TEMP/node.tar.xz" -C "$RUNNER_TEMP/node" --strip-components=1
+          echo "$RUNNER_TEMP/node/bin" >> "$GITHUB_PATH"
+
+      # A failing internal check is site.yml's to report; the external links are still worth
+      # checking on whatever the build wrote, so only a build that wrote no site stops here.
+      - name: Build the site at basalt's pin
+        run: |
+          set -eu
+          script/site --install || echo "::warning::script/site reported check failures; see site.yml's runs"
+          test -f target/build/site/index.html
+
+      - name: Check the links to other sites
+        id: check
+        run: node script/external-links.mjs target/build/site
+
+      - name: Keep the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: external-links
+          path: |
+            target/build/external-links.md
+            target/build/external-links.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Report through the labelled issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAILED: ${{ steps.check.outputs.failed }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -eu
+          label=external-links
+          open="$(gh issue list --repo "$GITHUB_REPOSITORY" --label "$label" --state open \
+            --json number --jq '.[0].number // empty')"
+          if [ "${FAILED:-0}" -eq 0 ]; then
+            if [ -n "$open" ]; then
+              gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "Every external address answered in $RUN."
+              gh issue close "$open" --repo "$GITHUB_REPOSITORY"
+            fi
+            exit 0
+          fi
+          # An issue body holds at most 65536 characters; the whole report is the run's artifact.
+          {
+            head -c 60000 target/build/external-links.md
+            [ "$(wc -c < target/build/external-links.md)" -le 60000 ] || printf '\n\n(Cut short; the whole report is the run artifact.)\n'
+            echo
+            echo "From $RUN. This issue is rewritten by each weekly run while addresses fail, and closed by the first run in which every address answers."
+          } > "$RUNNER_TEMP/body.md"
+          if [ -n "$open" ]; then
+            gh issue edit "$open" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh label create "$label" --repo "$GITHUB_REPOSITORY" --color d4c5f9 \
+              --description "Links from the site to other sites that failed the weekly check" 2>/dev/null || true
+            gh issue create --repo "$GITHUB_REPOSITORY" --label "$label" \
+              --title "Links to other sites that failed the weekly check" --body-file "$RUNNER_TEMP/body.md"
+          fi
