@@ -57,11 +57,29 @@ The build fails when a link inside the site reaches no page or no heading, when 
 the record names no file, when `milestone N` or `§N` names a record that does not exist, or when a
 numbered record has no page at its address. It writes the counts, with examples of each failure, to
 `target/build/summary.md` and `target/build/report.json`. Links to other sites are not checked in
-the build, since a remote outage must not fail it.
+the build, since a remote outage must not fail it; the weekly check below does that.
 
 CI (`.github/workflows/site.yml`) runs the build on each pull request, in the merge queue and on
 main, and uploads the built site as the run's artifact. Its job, `site build`, is the check the
 ruleset on main requires.
+
+## Links to other sites
+
+`.github/workflows/external-links.yml` checks the site's links to other sites every Monday, and
+whenever it is started by hand. It never runs on a pull request or in the merge queue, and no
+ruleset requires it. It builds the site at basalt's pin and runs `script/external-links.mjs`,
+which requests each distinct address once with Node's built-in `fetch`, with a timeout and two
+retries, and at most two requests at a time to one host. It reports through one open issue labelled
+`external-links`: a run with failures rewrites that issue's body, or opens it, and a run in which
+every address answers closes it. The run's token has only `contents: read` and `issues: write`.
+
+Against a local build:
+
+```sh
+script/site && node script/external-links.mjs
+```
+
+It writes `target/build/external-links.md` and `external-links.json`, and files nothing.
 
 ## Dependencies
 
@@ -101,5 +119,4 @@ setting that waits for the architect's approval.
 
 - A page for each crate, from that crate's own repository at a pinned revision.
 - The tutorial, from its own repository.
-- A scheduled check of links to other sites, outside the merge gate.
 - The deploy, above.
