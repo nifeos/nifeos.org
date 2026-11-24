@@ -1,0 +1,14 @@
+{
+  "name": "partsfoundry.org",
+  "private": true,
+  "description": "Builds partsfoundry.org from the design record. CI-only; see script/site.",
+  "type": "module",
+  "engines": {
+    "node": "24.22.1"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "3.1.7",
+    "markdown-it-anchor": "10.0.0",
+    "pagefind": "1.5.2"
+  }
+}
