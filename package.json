@@ -1,8 +1,8 @@
 {
-  "name": "nife-record-site",
+  "name": "partsfoundry.org",
   "private": true,
-  "description": "Builds the design record as a static site. CI-only; see script/site.",
-  "type": "commonjs",
+  "description": "Builds partsfoundry.org from the design record. CI-only; see script/site.",
+  "type": "module",
   "engines": {
     "node": "24.22.1"
   },

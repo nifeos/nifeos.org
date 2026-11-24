@@ -1,0 +1,83 @@
+# Builds partsfoundry.org from the design record and keeps the built site as this run's artifact.
+# It deploys nothing: the first deploy waits on the domain's DNS records (README.md, "Before the
+# first deploy").
+#
+# script/site holds what the build does: it reads basalt's pins.toml on main, fetches nifeos/record
+# at the `[record]` commit, renders it, indexes it and checks every internal link and every record
+# number's address. This workflow installs the pinned Node, runs it, writes its report to the step
+# summary and uploads the site. A run started by hand may name another record commit or branch.
+#
+# The job's name is the status check the ruleset on main requires, so renaming it is a ruleset
+# change too.
+
+name: site
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      record:
+        description: "A nifeos/record commit or branch to build in place of basalt's pin (empty for the pin)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: site build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # The Node build named by .node-version, checked against the digest in .node-sha256, whose
+      # comments carry the URL and provenance. A version bump without a new digest fails here.
+      - name: Install the pinned Node
+        run: |
+          set -eu
+          version="$(cat .node-version)"
+          sum="$(sed -n '/^[0-9a-f]\{64\}$/p' .node-sha256)"
+          if [ "${#sum}" -ne 64 ]; then
+            echo "==> .node-sha256 must hold exactly one 64-hex digest line" >&2
+            exit 2
+          fi
+          curl --fail --silent --show-error --location --retry 3 \
+            --output "$RUNNER_TEMP/node.tar.xz" \
+            "https://nodejs.org/dist/v${version}/node-v${version}-linux-x64.tar.xz"
+          echo "${sum}  $RUNNER_TEMP/node.tar.xz" | sha256sum --check --strict -
+          mkdir -p "$RUNNER_TEMP/node"
+          tar -xJf "$RUNNER_TEMP/node.tar.xz" -C "$RUNNER_TEMP/node" --strip-components=1
+          echo "$RUNNER_TEMP/node/bin" >> "$GITHUB_PATH"
+
+      - name: Build, index and check the site
+        env:
+          RECORD: ${{ inputs.record }}
+        run: |
+          set -eu
+          if [ -n "${RECORD:-}" ]; then
+            script/site --install --record-commit "$RECORD"
+          else
+            script/site --install
+          fi
+
+      # The site is kept even when a check fails, so the failure can be read on the built pages.
+      - name: Upload the site
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: site
+          path: |
+            target/build/site
+            target/build/report.json
+            target/build/summary.md
+          if-no-files-found: error
+          retention-days: 14

@@ -1,18 +1,15 @@
-// Eleventy's configuration for the design record's site. site/build.mjs stages the tracked
-// Markdown into an input directory laid out as the repository is, so a file's path under the input
-// is its repository path, and passes that directory and the list of staged files through the
-// environment. See script/site.
-//
-// Name: provisional, minted 2026-11-04 (UTC) by lane/record-site-build-eleventy. The file name is
-// the one Eleventy looks for.
+// Eleventy's configuration for the site. build.mjs stages the record's tracked Markdown into an
+// input directory laid out as the record is, so a file's path under the input is its path in the
+// record, and passes that directory and the lists of files through the environment. See
+// script/site.
 
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
 const anchor = require("markdown-it-anchor");
-const { addressFor } = require("./lib/address");
-const { createPlugin } = require("./lib/markdown");
+const { addressFor } = require("./lib/address.cjs");
+const { createPlugin } = require("./lib/markdown.cjs");
 
 // Heading identifiers as GitHub writes them, so a `#fragment` written against GitHub's rendering
 // lands on the same heading here.
@@ -25,11 +22,13 @@ function slugify(text) {
 }
 
 module.exports = function configure(config) {
-  const input = process.env.NIFE_SITE_INPUT;
-  const repository = process.env.NIFE_SITE_REPOSITORY;
-  const onSite = fs.readFileSync(process.env.NIFE_SITE_FILES, "utf8").split("\n").filter(Boolean);
-  const commit = process.env.NIFE_SITE_COMMIT || "main";
-  const markdown = createPlugin({ input, repository, onSite });
+  const input = process.env.SITE_INPUT;
+  const lines = (file) => fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
+  const onSite = lines(process.env.SITE_FILES);
+  const inRecord = lines(process.env.SITE_RECORD_FILES);
+  const commit = process.env.SITE_RECORD_COMMIT || "main";
+  const nifeCommit = process.env.SITE_NIFE_COMMIT || "";
+  const markdown = createPlugin({ input, onSite, inRecord, recordCommit: commit, nifeCommit });
 
   // The input sits under target/, which .gitignore names, so Eleventy must not read .gitignore.
   config.setUseGitIgnore(false);
@@ -42,7 +41,7 @@ module.exports = function configure(config) {
   config.addGlobalData("eleventyComputed", {
     permalink: (data) => (isIndex(data) ? "/index.html" : addressFor(repositoryPath(data)) + "index.html"),
     sourcePath: (data) => repositoryPath(data),
-    sourceUrl: (data) => `https://github.com/nifeos/nife/blob/${commit}/${repositoryPath(data)}`,
+    sourceUrl: (data) => `https://github.com/nifeos/record/blob/${commit}/${repositoryPath(data)}`,
     kind: (data) => (isIndex(data) ? "" : addressFor(repositoryPath(data)).split("/")[1]),
     title: (data) => {
       const heading = /^#\s+(.+)$/m.exec(data.page.rawInput || "");
@@ -62,11 +61,11 @@ module.exports = function configure(config) {
   config.on("eleventy.after", () => {
     const { assets, ...counts } = markdown.stats;
     const report = { ...counts, assets: [...assets].sort() };
-    fs.writeFileSync(process.env.NIFE_SITE_MARKDOWN_STATS, JSON.stringify(report, null, 2));
+    fs.writeFileSync(process.env.SITE_MARKDOWN_STATS, JSON.stringify(report, null, 2));
   });
 
   return {
-    dir: { input, includes: "_includes", output: process.env.NIFE_SITE_OUTPUT },
+    dir: { input, includes: "_includes", output: process.env.SITE_OUTPUT },
     templateFormats: ["md", "njk"],
     markdownTemplateEngine: false,
     htmlTemplateEngine: "njk",

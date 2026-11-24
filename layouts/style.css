@@ -4,7 +4,7 @@ nav { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 
 pre { overflow-x: auto; padding: 0.5rem; background: #f4f4f4; }
 table { border-collapse: collapse; display: block; overflow-x: auto; }
 td, th { border: 1px solid #ddd; padding: 0.2rem 0.4rem; }
-.offsite { border-bottom: 1px dotted #888; }
+.broken { border-bottom: 1px dotted #888; }
 @media (prefers-color-scheme: dark) {
   body { color: #e6e6e6; background: #141414; }
   pre { background: #222; }
