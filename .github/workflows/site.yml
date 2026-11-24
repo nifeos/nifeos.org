@@ -3,8 +3,8 @@
 # first deploy").
 #
 # script/site holds what the build does: it reads basalt's pins.toml on main, fetches nifeos/record
-# at the `[record]` commit, renders it, indexes it and checks every internal link and every record
-# number's address. This workflow installs the pinned Node, runs it, writes its report to the step
+# at the `[record]` commit and each crate in crates.toml at its pinned commit, renders them, indexes
+# them and checks every internal link, every record number's address and every crate's page. This workflow installs the pinned Node, runs it, writes its report to the step
 # summary and uploads the site. A run started by hand may name another record commit or branch.
 #
 # The job's name is the status check the ruleset on main requires, so renaming it is a ruleset

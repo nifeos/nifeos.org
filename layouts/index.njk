@@ -12,6 +12,14 @@
 <div id="search"></div>
 <script src="/pagefind/pagefind-ui.js"></script>
 <script>new PagefindUI({ element: "#search", showSubResults: true });</script>
+{% if crates.length %}
+<details open>
+<summary>crates ({{ crates.length }})</summary>
+<ul>
+{% for crate in crates %}<li><a href="/crates/{{ crate.name }}/">{{ crate.name }}</a> <small>{{ crate.repository }} at {{ crate.commit | truncate(12, true, "") }}</small></li>
+{% endfor %}</ul>
+</details>
+{% endif %}
 {% for kind in collections.record | kinds %}{% set pages = collections.record | byKind(kind) %}
 <details{% if kind == "roadmap" or kind == "decisions" %} open{% endif %}>
 <summary>{{ kind }} ({{ pages.length }})</summary>
