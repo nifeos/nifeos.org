@@ -1,0 +1,131 @@
+# The crates the site renders a page for, each at one commit of its own repository.
+#
+# One table per crate, named for the crate. `repository` is the GitHub repository and `commit` a
+# full 40-hex commit of it; script/site refuses a branch name or a short hash (lib/crates.cjs). The
+# build fetches each repository shallow at its commit and renders its README.md at
+# /crates/<crate>/. A crate is listed once it has its own public repository. A pin bump is an
+# ordinary pull request.
+
+[address_space_layout]
+repository = "nifeos/address_space_layout"
+commit = "840ddb7575c50b563ed167ce368f8de904c43338"
+
+[block_roster_contract]
+repository = "nifeos/block_roster_contract"
+commit = "b239a54646edaa4f0b4cb34222a612e3763a4aea"
+
+[boot_ladder]
+repository = "nifeos/boot_ladder"
+commit = "6f2dfda3957d047caae88ac7e35cc4b3d0dea714"
+
+[byte_glob]
+repository = "nifeos/byte_glob"
+commit = "519cedbf292d1134af2c1efae6047e969beb8ed8"
+
+[byte_sink_contract]
+repository = "nifeos/byte_sink_contract"
+commit = "d46cbe2be66a542e56736fd37de2691bf037668f"
+
+[capability_table]
+repository = "nifeos/capability_table"
+commit = "20e2deb08b8bf137a82066570d590bd440beef3c"
+
+[clock_contract]
+repository = "nifeos/clock_contract"
+commit = "0aa2107861977f25ff5e64218d28af6dff7c9a38"
+
+[counter_frequency_contract]
+repository = "nifeos/counter_frequency_contract"
+commit = "7e7bc1bf9b9e25608a650af1fff36b9dc15585bd"
+
+[designware_ethernet]
+repository = "nifeos/designware_ethernet"
+commit = "f40ee9059bc8915af445c3d61b12ea183908f522"
+
+[designware_mobile_storage]
+repository = "nifeos/designware_mobile_storage"
+commit = "dcc989da437da6d0db919a738695299f9ad51b84"
+
+[device_tree_blob]
+repository = "nifeos/device_tree_blob"
+commit = "96ad52af96e38e38577f91a787f53b789dbdda4f"
+
+[domain_name_system]
+repository = "nifeos/domain_name_system"
+commit = "c809deba894f1e6a07c60ca49d9fd2ef04d3425b"
+
+[e1000e]
+repository = "nifeos/e1000e"
+commit = "794ca566108a421a6642b8f91ab04f7af283634f"
+
+[entropy_contract]
+repository = "nifeos/entropy_contract"
+commit = "5c9f8eb67ce54304b960fdee42a0063f34a9a425"
+
+[environment_contract]
+repository = "nifeos/environment_contract"
+commit = "4778d5937460ef1e43e39113721422dd573a3306"
+
+[extensible_host_controller_interface]
+repository = "nifeos/extensible_host_controller_interface"
+commit = "5bc4cf95f74809a3683a84969caccae5b9223acc"
+
+[file_allocation_table]
+repository = "nifeos/file_allocation_table"
+commit = "faaf13f79a19ca56954ebbb2176485152a5c6c9f"
+
+[file_system_contract]
+repository = "nifeos/file_system_contract"
+commit = "7577a7d0df339107f75747c3681f5990f116cf61"
+
+[generational_table]
+repository = "nifeos/generational_table"
+commit = "832836094b1170f0f07275bb2adbb889d949ccc5"
+
+[grant_contract]
+repository = "nifeos/grant_contract"
+commit = "d4e9ca29d51bc71d678aadaa00411eba953202b3"
+
+[grant_plan]
+repository = "nifeos/grant_plan"
+commit = "b8c93c76fd555aba9c29980d4874daf7ef90b46a"
+
+[interfaces_note]
+repository = "nifeos/interfaces_note"
+commit = "1a750403d99cce578e60985cfe810425843f4417"
+
+[intrusive_queue]
+repository = "nifeos/intrusive_queue"
+commit = "10d1fa2893c1cab6db3901f79a1ab2bc0029170b"
+
+[jh7110_entropy]
+repository = "nifeos/jh7110_entropy"
+commit = "2bf731c691e3f035443b2ec69e0707a1c856c46b"
+
+[line_editor]
+repository = "nifeos/line_editor"
+commit = "b43cb319b1cf57b8e38680d090348f347408ffa2"
+
+[moho_abi]
+repository = "nifeos/moho_abi"
+commit = "c8d556ec5ca7e567df529368c7dd24943423ab74"
+
+[non_volatile_memory_express]
+repository = "nifeos/non_volatile_memory_express"
+commit = "3d9080a5f39f2d01df7b914585eed50384492309"
+
+[program_argument_contract]
+repository = "nifeos/program_argument_contract"
+commit = "764e0e55a238252391b1c06135e228ef6b9436c8"
+
+[rsext4]
+repository = "nifeos/rsext4"
+commit = "33cb5ed9ab1ef6538e831c0c068010a305a0fb58"
+
+[terminal_contract]
+repository = "nifeos/terminal_contract"
+commit = "4464f9014e9bbfe6339ca5f2bc459d16b4896938"
+
+[universal_serial_bus]
+repository = "nifeos/universal_serial_bus"
+commit = "0fbceff0ce9577cf8beb0b82b0f34360a86a5216"

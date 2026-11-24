@@ -1,14 +1,14 @@
 # partsfoundry.org
 
 This repository builds the website at partsfoundry.org. Today the site is the design record of the
-nifeos projects: every roadmap milestone, decision, journey, fatal risk, tenet and note in
-[nifeos/record](https://github.com/nifeos/record), with search. A page for each crate and the
-tutorial join it later.
+nifeos projects, every roadmap milestone, decision, journey, fatal risk, tenet and note in
+[nifeos/record](https://github.com/nifeos/record), and a page for each crate that has its own
+repository, all with search. The tutorial joins it later.
 
-None of what the site shows lives here. At build time the builder fetches the record from its own
-repository, and this repository holds only the builder: an [Eleventy](https://www.11ty.dev/)
-configuration, a markdown-it plugin, a link check and a [Pagefind](https://pagefind.app/) index
-step.
+None of what the site shows lives here. At build time the builder fetches the record and each crate
+from its own repository, and this repository holds only the builder and the list of crates: an
+[Eleventy](https://www.11ty.dev/) configuration, a markdown-it plugin, a link check, a
+[Pagefind](https://pagefind.app/) index step and `crates.toml`.
 
 ## Addresses
 
@@ -23,9 +23,10 @@ are drafts:
 | `design/fatal-risks/3-*.md` | `/fatal-risks/3/` |
 | a file in a milestone's appendix directory, `design/roadmap/1018-*/measurements.md` | `/roadmap/1018/measurements/` |
 | any other file, `design/naming.md`, `notes/citations.md` | `/naming/`, `/notes/citations/` |
+| the README.md of a crate in `crates.toml` | `/crates/<crate>/` |
 
-There is no hand-written index. The front page lists the records by kind, read from each file's H1
-and frontmatter. In prose, `milestone N` and `§N` link to those addresses, a bare `#N` links to that
+There is no hand-written index. The front page lists the crates in `crates.toml`'s order, and the
+records by kind, read from each file's H1 and frontmatter. In prose, `milestone N` and `§N` link to those addresses, a bare `#N` links to that
 pull request in nifeos/nife, and `nifeos/<repo>#N`, `nifeos/<repo>@<commit>` and
 `nifeos/<repo>:<path>` link to GitHub, except that a `nifeos/record:<path>` naming a page this site
 renders links to that page.
@@ -41,6 +42,19 @@ each merge there, so the site trails the record's main by one pull request in ba
 record's main directly is a run away: `script/site --record-commit main`, or the workflow's
 `record` input when it is started by hand.
 
+## Which crates it builds
+
+`crates.toml` has one table per crate, named for the crate, with its `repository` and a full 40-hex
+`commit`. The build refuses a branch name or a short hash, fetches each repository shallow at its
+commit and renders its README.md at `/crates/<crate>/`. A crate is listed once it has its own
+public repository, and a pin bump is an ordinary pull request.
+
+A relative link in a README resolves against the crate's repository at the pinned commit: a link to
+the README itself is the crate's page, a link to any other file of the repository goes to that file
+on GitHub at the pin, and a link to no file fails the build. A README is the crate's own text, read
+on GitHub and crates.io as well, so the record's shorthand (`milestone N`, `§N`, a bare `#N`) stays
+text in it; a `nifeos/<repo>#N` or `nifeos/<repo>@<commit>` reference still links.
+
 ## Building
 
 ```sh
@@ -54,8 +68,8 @@ Then browse to http://localhost:8000/. Search needs the site served over HTTP, s
 fetches its index. The header of `script/site` says more.
 
 The build fails when a link inside the site reaches no page or no heading, when a relative link in
-the record names no file, when `milestone N` or `§N` names a record that does not exist, or when a
-numbered record has no page at its address. It writes the counts, with examples of each failure, to
+the record or in a crate README names no file, when `milestone N` or `§N` names a record that does
+not exist, or when a numbered record or a crate in `crates.toml` has no page at its address. It writes the counts, with examples of each failure, to
 `target/build/summary.md` and `target/build/report.json`. Links to other sites are not checked in
 the build, since a remote outage must not fail it.
 
@@ -99,7 +113,9 @@ setting that waits for the architect's approval.
 
 ## Not here yet
 
-- A page for each crate, from that crate's own repository at a pinned revision.
+- Each crate's API documentation (`cargo doc --no-deps`) at `/crates/<crate>/api/`.
+- A workflow that proposes crate pin bumps, as basalt's record-pin-bump workflow does for the
+  record.
 - The tutorial, from its own repository.
 - A scheduled check of links to other sites, outside the merge gate.
 - The deploy, above.

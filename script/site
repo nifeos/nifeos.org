@@ -1,7 +1,8 @@
 #!/bin/sh
 #
-# Build partsfoundry.org: fetch the design record at the commit basalt pins, render it with
-# Eleventy, index it with Pagefind, check every internal link, and report.
+# Build partsfoundry.org: fetch the design record at the commit basalt pins and each crate in
+# crates.toml at its pinned commit, render them with Eleventy, index them with Pagefind, check every
+# internal link, and report.
 #
 # The record lives in nifeos/record and is never copied into this repository. basalt's pins.toml,
 # on basalt's main, names the record commit that goes with the current distribution in its
@@ -9,11 +10,17 @@
 # (the record's main, say, to preview a change before basalt's pin follows it), and `--record`
 # builds a local checkout of the record, at its HEAD.
 #
+# Each crate's page is its README.md, from the crate's own repository at the full commit crates.toml
+# names for it (lib/crates.cjs reads the file and refuses a branch name or a short hash). It is
+# rendered at /crates/<crate>/. A relative link in a README to a file of that repository goes to the
+# file on GitHub at the pinned commit, and a relative link to no file fails the build, as in the
+# record.
+#
 # The output is target/build/site/; the report is target/build/summary.md, and report.json beside
 # it holds the same numbers and examples. The build fails when a link inside the site reaches no
-# page or no heading, when a relative link in the record names no file, when a citation names a
-# record that does not exist, or when a numbered record has no page at its address. It deploys
-# nothing.
+# page or no heading, when a relative link in the record or a crate README names no file, when a
+# citation names a record that does not exist, or when a numbered record or a listed crate has no
+# page at its address. It deploys nothing.
 #
 #     script/site                              # the record at basalt's pin
 #     script/site --record-commit main         # the record at another commit or branch
@@ -70,14 +77,15 @@ want="$(cat "$root/.node-version")"
 have="$(node --version | sed 's/^v//')"
 [ "$have" = "$want" ] || echo "script/site: warning: node $have on PATH, .node-version pins $want" >&2
 
-# One commit of one repository, fetched shallow into the cache once and reused after.
+# One commit of one repository, given by its URL, fetched shallow into the cache once and reused
+# after.
 fetch_commit() {
-    repository="$1" commit="$2"
-    tree="$cache/$repository-$commit"
+    url="$1" commit="$2"
+    tree="$cache/${url##*/}-$commit"
     if [ ! -f "$tree/.site-fetch-complete" ]; then
         rm -rf "$tree"
         git init -q "$tree"
-        git -C "$tree" fetch -q --depth=1 "$organization/$repository" "$commit"
+        git -C "$tree" fetch -q --depth=1 "$url" "$commit"
         git -C "$tree" checkout -q --detach FETCH_HEAD
         touch "$tree/.site-fetch-complete"
     fi
@@ -129,8 +137,22 @@ else
                 { echo "script/site: nifeos/record has no branch $named; pass a full commit or a branch" >&2; exit 1; }
         fi
     fi
-    record="$(fetch_commit record "$record_commit")"
+    record="$(fetch_commit "$organization/record" "$record_commit")"
 fi
+
+# Each crate in crates.toml, at its pinned commit. The list build.mjs reads holds one line per
+# crate: its name, repository, commit and the fetched tree.
+crates="$cache/crates.list"
+crate_pins="$(node "$root/lib/crates.cjs" "$root/crates.toml")" || exit 1
+: > "$crates.partial"
+echo "$crate_pins" | while read -r name repository commit; do
+    [ -n "$name" ] || continue
+    tree="$(fetch_commit "https://github.com/$repository" "$commit")"
+    [ -f "$tree/README.md" ] ||
+        { echo "script/site: $repository at $commit has no README.md for crate $name" >&2; exit 1; }
+    echo "$name $repository $commit $tree" >> "$crates.partial"
+done
+mv "$crates.partial" "$crates"
 
 if [ "$install" -eq 1 ] || [ ! -d "$root/node_modules" ] ||
     ! cmp -s "$root/package-lock.json" "$root/node_modules/.package-lock.json.site"; then
@@ -139,5 +161,5 @@ if [ "$install" -eq 1 ] || [ ! -d "$root/node_modules" ] ||
 fi
 
 SITE_RECORD="$record" SITE_RECORD_COMMIT="$record_commit" SITE_RECORD_SOURCE="$record_source" \
-    SITE_BASALT_COMMIT="$basalt_commit" SITE_NIFE_COMMIT="$nife_commit" \
+    SITE_BASALT_COMMIT="$basalt_commit" SITE_NIFE_COMMIT="$nife_commit" SITE_CRATES="$crates" \
     exec node "$root/build.mjs"
