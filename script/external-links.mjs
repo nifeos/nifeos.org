@@ -10,7 +10,9 @@
 // a network error, a timeout, a 429 or a 5xx is retried, twice, after a pause of 15 s and then
 // 60 s, or what Retry-After asks. A final status of 400 or above, or an error, is a failure. A site's own `source:`
 // link to the file it was built from is skipped: the build already knows that file exists at that
-// commit. Requests to one host run at most two at a time, so that no site sees a burst.
+// commit. So is each address in NOT_REQUESTED below: a page a person loaded in a browser that refuses
+// this script from a hosted runner, listed with the reason. The report names them, so they are not
+// forgotten. Requests to one host run at most two at a time, so that no site sees a burst.
 //
 //     node script/external-links.mjs                       # target/build/site, as script/site left it
 //     node script/external-links.mjs <site directory>
@@ -24,7 +26,8 @@
 // - A page that needs a login (an organization's settings page, say) answers 404 to a request
 //   without one, and is reported as a failure.
 // - Some sites refuse requests that do not come from a browser, with 403 or 429; those are
-//   reported too, with their status, and a person judges them.
+//   reported too, with their status, and a person judges them. One that loads in a browser goes
+//   into NOT_REQUESTED.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -39,6 +42,19 @@ const PER_HOST = 2;
 const OVERALL = 12;
 const PAGES_SHOWN = 3;
 const USER_AGENT = "partsfoundry.org-link-check (+https://github.com/nifeos/partsfoundry.org)";
+
+// Addresses not requested, each with the reason. An entry is one exact address, not a host, so a
+// new link to the same site is still checked once and a person judges it. Remove an entry when its
+// page stops loading in a browser or the record stops linking it.
+const NOT_REQUESTED = new Map([
+  ["https://forums.raspberrypi.com/viewtopic.php?t=371974", "Cloudflare challenge (403) to any script; loads in a browser"],
+  ["https://uefi.org/specs/UEFI/2.10/03_Boot_Manager.html", "403 to a hosted runner; 200 elsewhere, and loads in a browser"],
+  ["https://wiki.osdev.org", "Cloudflare challenge (403) to any script; loads in a browser"],
+  [
+    "https://www.cnx-software.com/2026/05/11/rva23-pico-itx-sbc-spacemit-k3-octa-core-risc-v-ai-soc-up-to-32gb-ram-256gb-ufs/",
+    "403 to a hosted runner; 200 elsewhere, and loads in a browser",
+  ],
+]);
 
 function htmlFiles(root) {
   const found = [];
@@ -134,7 +150,7 @@ async function checkAll(addresses) {
   return results;
 }
 
-function report(addresses, results, seconds) {
+function report(addresses, results, skipped, seconds) {
   const failed = [...results].filter(([, result]) => !result.ok).sort(([a], [b]) => a.localeCompare(b));
   const pages = new Set([...addresses.values()].flatMap((set) => [...set]));
   const hosts = new Set([...addresses.keys()].map((address) => new URL(address).host));
@@ -143,7 +159,9 @@ function report(addresses, results, seconds) {
     "",
     `${addresses.size} distinct addresses on ${hosts.size} hosts, linked from ${pages.size} pages, checked in ${Math.round(seconds)} s.`,
     "",
-    failed.length ? `**${failed.length} failed.**` : "Every address answered.",
+    `${skipped.length} not requested, each named in script/external-links.mjs with the reason: ${skipped.map((address) => `<${address}>`).join(", ") || "none"}.`,
+    "",
+    failed.length ? `**${failed.length} failed.**` : "Every address requested answered.",
   ];
   if (failed.length) {
     lines.push("", "| address | result | linked from |", "|---|---|---|");
@@ -161,10 +179,12 @@ try {
   if (!fs.existsSync(path.join(site, "index.html"))) throw new Error(`no built site at ${site}; run script/site first`);
   const start = Date.now();
   const addresses = collect(site);
-  const results = await checkAll([...addresses.keys()]);
-  const { text, failed } = report(addresses, results, (Date.now() - start) / 1000);
+  const skipped = [...addresses.keys()].filter((address) => NOT_REQUESTED.has(address)).sort();
+  const results = await checkAll([...addresses.keys()].filter((address) => !NOT_REQUESTED.has(address)));
+  const { text, failed } = report(addresses, results, skipped, (Date.now() - start) / 1000);
   const json = {
     addresses: addresses.size,
+    notRequested: skipped.map((address) => ({ address, reason: NOT_REQUESTED.get(address) })),
     failed: failed.map(([address, result]) => ({ address, ...result, pages: [...addresses.get(address)].sort() })),
   };
   fs.writeFileSync(path.join(out, "external-links.md"), text);
