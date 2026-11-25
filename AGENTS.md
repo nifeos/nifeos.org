@@ -1,4 +1,4 @@
-# Working on partsfoundry.org
+# Working on nifeos.org
 
 This repository builds the website from the design record (`nifeos/record`). README.md says what
 the site is, which record commit it builds and how to run the build.

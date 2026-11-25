@@ -1,4 +1,4 @@
-# Builds partsfoundry.org from the design record and keeps the built site as this run's artifact.
+# Builds nifeos.org from the design record and keeps the built site as this run's artifact.
 # It deploys nothing: the first deploy waits on the domain's DNS records (README.md, "Before the
 # first deploy").
 #

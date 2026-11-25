@@ -41,7 +41,7 @@ const ATTEMPTS = 3;
 const PER_HOST = 2;
 const OVERALL = 12;
 const PAGES_SHOWN = 3;
-const USER_AGENT = "partsfoundry.org-link-check (+https://github.com/nifeos/partsfoundry.org)";
+const USER_AGENT = "nifeos.org-link-check (+https://github.com/nifeos/nifeos.org)";
 
 // Addresses not requested, each with the reason. An entry is one exact address, not a host, so a
 // new link to the same site is still checked once and a person judges it. Remove an entry when its

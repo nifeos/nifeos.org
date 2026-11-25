@@ -190,7 +190,7 @@ function summary(report) {
     local: ", a local checkout",
   }[report.recordSource];
   const lines = [
-    "## partsfoundry.org build",
+    "## nifeos.org build",
     "",
     `Built from nifeos/record at \`${report.recordCommit.slice(0, 12)}\`${pin}, and ${crates.checked} crates at the commits crates.toml pins. Nothing is deployed; the site is this run's artifact.`,
     "",
