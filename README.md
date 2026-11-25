@@ -3,7 +3,8 @@
 This repository builds the website at nifeos.org. Today the site is the design record of the
 nifeos projects, every roadmap milestone, decision, journey, fatal risk, tenet and note in
 [nifeos/record](https://github.com/nifeos/record), and a page for each crate that has its own
-repository, all with search. The tutorial joins it later.
+repository, all with search. The tutorial joins it later. The domain partsfoundry.org belongs to the
+partsfoundry library and does not serve the record.
 
 None of what the site shows lives here. At build time the builder fetches the record and each crate
 from its own repository, and this repository holds only the builder and the list of crates: an
