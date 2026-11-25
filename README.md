@@ -83,7 +83,9 @@ ruleset on main requires.
 whenever it is started by hand. It never runs on a pull request or in the merge queue, and no
 ruleset requires it. It builds the site at basalt's pin and runs `script/external-links.mjs`,
 which requests each distinct address once with Node's built-in `fetch`, with a timeout and two
-retries, and at most two requests at a time to one host. It reports through one open issue labelled
+retries, and at most two requests at a time to one host. It does not request the few addresses
+listed in the script's `NOT_REQUESTED`, each a page that loads in a browser but refuses a script
+from a hosted runner, and the report names them. It reports through one open issue labelled
 `external-links`: a run with failures rewrites that issue's body, or opens it, and a run in which
 every address answers closes it. The run's token has only `contents: read` and `issues: write`.
 
