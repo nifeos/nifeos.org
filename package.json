@@ -1,7 +1,7 @@
 {
-  "name": "partsfoundry.org",
+  "name": "nifeos.org",
   "private": true,
-  "description": "Builds partsfoundry.org from the design record. CI-only; see script/site.",
+  "description": "Builds nifeos.org from the design record. CI-only; see script/site.",
   "type": "module",
   "engines": {
     "node": "24.22.1"

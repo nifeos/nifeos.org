@@ -1,6 +1,6 @@
-# partsfoundry.org
+# nifeos.org
 
-This repository builds the website at partsfoundry.org. Today the site is the design record of the
+This repository builds the website at nifeos.org. Today the site is the design record of the
 nifeos projects, every roadmap milestone, decision, journey, fatal risk, tenet and note in
 [nifeos/record](https://github.com/nifeos/record), and a page for each crate that has its own
 repository, all with search. The tutorial joins it later.
@@ -112,23 +112,20 @@ The site deploys nowhere yet. GitHub Pages is not enabled for this repository, n
 set, and the workflow has no deploy job. Three things wait on a person who holds the domain's
 registrar account and the organization's settings:
 
-1. **The DNS records for partsfoundry.org.** At the registrar, the apex `partsfoundry.org` gets the
+1. **The DNS records for nifeos.org.** At the registrar, the apex `nifeos.org` gets the
    four GitHub Pages addresses as `A` records, `185.199.108.153`, `185.199.109.153`,
    `185.199.110.153` and `185.199.111.153`, and as `AAAA` records, `2606:50c0:8000::153`,
-   `2606:50c0:8001::153`, `2606:50c0:8002::153` and `2606:50c0:8003::153`. `www.partsfoundry.org`
-   gets a `CNAME` to the organization's Pages host, `<organization>.github.io`. The organization is
-   to be renamed from `nifeos` to `partsfoundry`, and that host name changes with it, so the
-   `CNAME` is best set after the rename, or changed then.
+   `2606:50c0:8001::153`, `2606:50c0:8002::153` and `2606:50c0:8003::153`. `www.nifeos.org`
+   gets a `CNAME` to the organization's Pages host, `nifeos.github.io`.
 2. **The organization's verified domain.** In the organization's settings, under Pages, add
-   `partsfoundry.org` as a verified domain. GitHub then shows a `TXT` record, named
-   `_github-pages-challenge-<organization>.partsfoundry.org`, to add at the registrar. Verifying
-   stops any other GitHub account from serving a page on the domain. The record's name carries the
-   organization's login, so a verification made before the rename may need redoing after it.
+   `nifeos.org` as a verified domain. GitHub then shows a `TXT` record, named
+   `_github-pages-challenge-nifeos.nifeos.org`, to add at the registrar. Verifying
+   stops any other GitHub account from serving a page on the domain.
 3. **Renewal.** Auto-renew, or a longer term, on the registration, since a lapse breaks every
    quoted link.
 
 After those, enabling Pages (source: GitHub Actions), setting the custom domain to
-`partsfoundry.org` with HTTPS enforced, and adding the deploy job are each a pull request or a
+`nifeos.org` with HTTPS enforced, and adding the deploy job are each a pull request or a
 setting that waits for the architect's approval.
 
 ## Not here yet

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Build partsfoundry.org: fetch the design record at the commit basalt pins and each crate in
+# Build nifeos.org: fetch the design record at the commit basalt pins and each crate in
 # crates.toml at its pinned commit, render them with Eleventy, index them with Pagefind, check every
 # internal link, and report.
 #
