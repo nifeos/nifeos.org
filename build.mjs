@@ -192,7 +192,7 @@ function summary(report) {
   const lines = [
     "## nifeos.org build",
     "",
-    `Built from nifeos/record at \`${report.recordCommit.slice(0, 12)}\`${pin}, and ${crates.checked} crates at the commits crates.toml pins. Nothing is deployed; the site is this run's artifact.`,
+    `Built from nifeos/record at \`${report.recordCommit.slice(0, 12)}\`${pin}, and ${crates.checked} crates at the commits crates.toml pins. The site is this run's artifact; on main the deploy job publishes it.`,
     "",
     total ? `**${total} check failures.** The build fails.` : "Every check passes.",
     "",
