@@ -74,9 +74,9 @@ not exist, or when a numbered record or a crate in `crates.toml` has no page at 
 `target/build/summary.md` and `target/build/report.json`. Links to other sites are not checked in
 the build, since a remote outage must not fail it; the weekly check below does that.
 
-CI (`.github/workflows/site.yml`) runs the build on each pull request, in the merge queue and on
-main, and uploads the built site as the run's artifact. Its job, `site build`, is the check the
-ruleset on main requires.
+CI (`.github/workflows/site.yml`) runs the build on each pull request, in the merge queue, on main
+and daily, and uploads the built site as the run's artifact. Its job `site build` is the check the
+ruleset on main requires. On main it also deploys, below.
 
 ## Links to other sites
 
@@ -107,27 +107,32 @@ install with `npm ci --ignore-scripts`, each version is at least two weeks old w
 bump is an ordinary pull request. Any other npm package is a dependency decision for the
 maintainers, not a convenience.
 
-## Before the first deploy
+## Deploying
 
-The site deploys nowhere yet. GitHub Pages is not enabled for this repository, no custom domain is
-set, and the workflow has no deploy job. Three things wait on a person who holds the domain's
-registrar account and the organization's settings:
+GitHub Pages serves the site at nifeos.org. Pages is enabled for this repository with GitHub Actions
+as its source, and the custom domain is set to `nifeos.org`. The apex has the four GitHub Pages
+addresses as `A` records, `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and
+`185.199.111.153`, and `nifeos.org` is a verified domain in the organization's Pages settings,
+through its `TXT` record `_github-pages-challenge-nifeos.nifeos.org`. Verifying stops any other
+GitHub account from serving a page on the domain.
 
-1. **The DNS records for nifeos.org.** At the registrar, the apex `nifeos.org` gets the
-   four GitHub Pages addresses as `A` records, `185.199.108.153`, `185.199.109.153`,
-   `185.199.110.153` and `185.199.111.153`, and as `AAAA` records, `2606:50c0:8000::153`,
-   `2606:50c0:8001::153`, `2606:50c0:8002::153` and `2606:50c0:8003::153`. `www.nifeos.org`
-   gets a `CNAME` to the organization's Pages host, `nifeos.github.io`.
-2. **The organization's verified domain.** In the organization's settings, under Pages, add
-   `nifeos.org` as a verified domain. GitHub then shows a `TXT` record, named
-   `_github-pages-challenge-nifeos.nifeos.org`, to add at the registrar. Verifying
-   stops any other GitHub account from serving a page on the domain.
-3. **Renewal.** Auto-renew, or a longer term, on the registration, since a lapse breaks every
-   quoted link.
+The `site deploy` job in `.github/workflows/site.yml` publishes main. It runs after a green
+`site build` on a push to main, on the daily schedule, and on a run started by hand on main that
+names no other record commit; a pull request and the merge queue never deploy. The record pin lives
+in basalt, so a move of it pushes nothing here, and the daily run is what brings the live site to
+basalt's newest pin. Only that job holds `pages: write` and `id-token: write`, it deploys into the
+`github-pages` environment, and one deploy finishes before the next starts.
 
-After those, enabling Pages (source: GitHub Actions), setting the custom domain to
-`nifeos.org` with HTTPS enforced, and adding the deploy job are each a pull request or a
-setting that waits for the architect's approval.
+Three things wait on a person who holds the domain's registrar account and the repository's
+settings:
+
+1. **The `AAAA` records.** The apex `nifeos.org` gets `2606:50c0:8000::153`, `2606:50c0:8001::153`,
+   `2606:50c0:8002::153` and `2606:50c0:8003::153`.
+2. **The `www` name.** `www.nifeos.org` gets a `CNAME` to `nifeos.github.io`.
+3. **HTTPS.** Enforce HTTPS in the repository's Pages settings once GitHub has issued the
+   certificate for the domain.
+
+The registration should auto-renew, or run a longer term, since a lapse breaks every quoted link.
 
 ## Not here yet
 
@@ -135,4 +140,3 @@ setting that waits for the architect's approval.
 - A workflow that proposes crate pin bumps, as basalt's record-pin-bump workflow does for the
   record.
 - The tutorial, from its own repository.
-- The deploy, above.

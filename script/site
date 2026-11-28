@@ -20,7 +20,7 @@
 # it holds the same numbers and examples. The build fails when a link inside the site reaches no
 # page or no heading, when a relative link in the record or a crate README names no file, when a
 # citation names a record that does not exist, or when a numbered record or a listed crate has no
-# page at its address. It deploys nothing.
+# page at its address. It deploys nothing; the deploy job in .github/workflows/site.yml does.
 #
 #     script/site                              # the record at basalt's pin
 #     script/site --record-commit main         # the record at another commit or branch
